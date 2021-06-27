@@ -43,11 +43,11 @@ states = ["Andhra Pradesh", "Chhattisgarh", "Haryana", "Gujrat", "Delhi NCR", "K
 "Tamil Nadu", "Telangana", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Bihar", "Goa"]
 
 
-def gen_review(handles, num, num_var, ofile, ifile='r_temp_copy.xlsx'):
+def gen_review(handles, num, num_var, ofile, ifile="r_temp_copy.xlsx"):
   wb = load_workbook(filename=ifile)
   sheet = wb.active
 
-  for h in handles:
+  for idx, h in enumerate(handles):
     r = random.randint(1, 11)
     rating_spread = [5] * 65 + [4] * 15 + [3] * 10 + [2] * r + [1] * (10 - r);
 
@@ -55,20 +55,32 @@ def gen_review(handles, num, num_var, ofile, ifile='r_temp_copy.xlsx'):
 
     for i in range(rev_count):
       rating = random.choice(rating_spread)
+
       r_texts = list(filter(lambda x: x[0] == rating, reviews))
-      rating_title = random.choice(r_texts)[1]
+      rating_title = random.choice(r_texts)[1] + random.choice(['', '.' * random.randint(0, 2)])
+
+      r_bodies = list(filter(lambda x: x[0] == rating, titles))
+      rating_body = random.choice(r_bodies)[1] + random.choice(['', '.' * random.randint(0, 2)])
+
       names = get_names((len(handles) * rev_count) + 100)
 
       r_name = names[random.randint(0, len(names) - 1)]
 
-      sheet.cell(row=i + 2, column=1, value=h) #handle
-      sheet.cell(row=i + 2, column=3, value=rating) #rating
-      sheet.cell(row=i + 2, column=4, value=rating_title) #title
-      sheet.cell(row=i + 2, column=5, value=f"{r_name[0]} {r_name[1]}") #author
-      sheet.cell(row=i + 2, column=6, value=r_name[2]) #email
+      sheet.cell(row=(idx * i) + 2, column=1, value=h) #handle
+      sheet.cell(row=(idx * i) + 2, column=2, value="published") #state
+      sheet.cell(row=(idx * i) + 2, column=3, value=rating) #rating
+      sheet.cell(row=(idx * i) + 2, column=4, value=rating_title) #title
+      sheet.cell(row=(idx * i) + 2, column=5, value=f"{r_name[0]} {r_name[1]}") #author
+      sheet.cell(row=(idx * i) + 2, column=6, value=r_name[2]) #email
+      sheet.cell(row=(idx * i) + 2, column=7, value=random.choice(states)) #location
+      sheet.cell(row=(idx * i) + 2, column=8, value=rating_body) #body
+      sheet.cell(row=(idx * i) + 2, column=10, value=random_date("1/1/2021 1:30 PM", "6/27/2021 4:50 AM", random.random())) #created_at
+
+    print(f"Generated reviews for handle: {h}")
     
-    wb.save(ofile)
-    wb.close()
+  wb.save(ofile)
+  wb.close()
+  print("done")
 
 
 def check_name(name):
@@ -134,4 +146,8 @@ if __name__ == '__main__':
   print("it runs")
   sanit_names()
   # get_names(2000)
-  # gen_review(["abstract-graphic-printed-shirt-navy-blue"], 20, 5, 'output.xlsx')
+  shirt_handles = ["game-of-thrones-quoted-t-shirt-white", "white-graphic-print-t-shirt-artwork-by-gal-shir", "im-the-danger-t-shirt-white",
+  "sweet-lips-graphic-print-t-shirt", "thats-what-she-said-t-shirt-white", "the-wire-quoted-crew-neck-t-shirt-white", "tiger-head-graphic-print-t-shirt-white",
+  "tommy-shelby-quoted-white-crew-neck-t-shirt", "wild-tiger-graphic-print-t-shirt"]
+
+  gen_review(shirt_handles, 50, 10, 'output_new.xlsx')
