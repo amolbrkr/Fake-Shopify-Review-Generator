@@ -9,6 +9,15 @@ from openpyxl import load_workbook
 import pandas
 import re
 import random
+import time
+
+titles = [(5, "Good one"), (5, "Totally good and fit"), (5, "fabric is good.. fitting is good"), (5, "Amazing product in perfect price"),
+(5, "Good and genuine product"), (5, "It's awesome.."), (5, "Wow I am very happy."), (4, "Nice fitting and cloth"), (4, "Nice product ☺️"),
+(4, "Nice t shirts amazing"), (4, "Nice brand"), (4, "Decent fitting"), (4, "Not bad"), (4, "Just go for it 👍😊"),
+(4, "Good fabric with reliable price"), (4, "Good👍"), (3, "Not pure cotton"), (3, "Poor quality"), (3, "Size is big.buy a small no."),
+(3, "Okay"), (3, "Nothing special"), (2, "Overpriced"), (2, "Not satisfied"), (2, "Colour comes out while washing"),
+(2, "Don't waste money"), (2, "Packing is not good"), (2, "bad quality febrics"), (2, "Loose fit."), (2, "Bad quality, colour faded."),
+(1, "Poor quality"), (1, "Pooer quality"), (1, "Bad designs"), (1, "I expected more"), (1, "Good"), (1, "Really bad"), (1, "Not buying again")]
 
 reviews = [(5, "Good product, they also delivered faster than I thought."),
 (5, "No complaints"), (5, "Decent Quality for the price"), (5, "Product is good"), (5, "Right on the money, good shirts"),
@@ -30,6 +39,9 @@ reviews = [(5, "Good product, they also delivered faster than I thought."),
 (1, "This is why I prefer buying from a local mall"), (1, "Costly brand"), (1, "My boyfriend didnt like the shirt"), (1, "Not enough plus sizes"),
 (1, "Costly for the quality of shirt you get"), (1, "")]
 
+states = ["Andhra Pradesh", "Chhattisgarh", "Haryana", "Gujrat", "Delhi NCR", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Punjab", "Rajasthan", "Odisha",
+"Tamil Nadu", "Telangana", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Bihar", "Goa"]
+
 
 def gen_review(handles, num, num_var, ofile, ifile='r_temp_copy.xlsx'):
   wb = load_workbook(filename=ifile)
@@ -37,9 +49,10 @@ def gen_review(handles, num, num_var, ofile, ifile='r_temp_copy.xlsx'):
 
   for h in handles:
     r = random.randint(1, 11)
-    rating_spread = [5] * 70 + [4] * 10 + [3] * 10 + [2] * r + [1] * (10 - r);
+    rating_spread = [5] * 65 + [4] * 15 + [3] * 10 + [2] * r + [1] * (10 - r);
 
     rev_count = num + random.choice([-1, 1]) * num_var
+
     for i in range(rev_count):
       rating = random.choice(rating_spread)
       r_texts = list(filter(lambda x: x[0] == rating, reviews))
@@ -59,7 +72,7 @@ def gen_review(handles, num, num_var, ofile, ifile='r_temp_copy.xlsx'):
 
 
 def check_name(name):
-  if re.match(r'^[a-zA-Z ]+$', name) and len(str(name).split()) >= 2:
+  if re.match(r'^[a-zA-Z ]+$', str(name)) and len(str(name).split()) >= 2:
     return True
   else:
     return False
@@ -80,8 +93,11 @@ def sanit_names():
   random.shuffle(valids)
 
   for i, v in enumerate(valids):
-    email = ''.join(v.split()) + '@gmail.com'
-    dat = (v.split()[0], v.split()[1], email)
+    r_sufx = random.choice([random.randint(0, 100), random.choice('abcxyzdefuvw')])
+    e_provider = random.choice(["gmail", "yahoo", "outlook", "mail", "quanto", "cxit", "gorrilamail"])
+
+    email = f"{''.join(v.split())}{r_sufx}@{e_provider}.com"
+    dat = (v.split()[0].title(), v.split()[1].title(), email)
     for j, x in enumerate(dat):
       sheet.cell(row=i + 1, column=j + 1, value=x)
   
@@ -100,7 +116,22 @@ def get_names(count, file="names.xlsx"):
   return names
 
 
+def str_time_prop(start, end, time_format, prop):
+  stime = time.mktime(time.strptime(start, time_format))
+  etime = time.mktime(time.strptime(end, time_format))
+
+  ptime = stime + prop * (etime - stime)
+
+  return time.strftime(time_format, time.localtime(ptime))
+
+
+def random_date(start, end, prop):
+  return str_time_prop(start, end, '%m/%d/%Y %I:%M %p', prop)
+    
+
+
 if __name__ == '__main__':
   print("it runs")
+  sanit_names()
   # get_names(2000)
-  gen_review(["abstract-graphic-printed-shirt-navy-blue"], 20, 5, 'output.xlsx')
+  # gen_review(["abstract-graphic-printed-shirt-navy-blue"], 20, 5, 'output.xlsx')
